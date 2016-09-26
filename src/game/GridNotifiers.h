@@ -683,6 +683,25 @@ class FriendlyCCedInRange
         Unit const* i_obj;
         float i_range;
 };
+///void DoFindFriendlyNPC(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown);
+class FriendlyNPCInRange
+{
+public:
+	FriendlyNPCInRange(Creature *obj, uint64 guid, float range, uint64 myguid, uint32 cooldown) : i_obj(obj), i_range(range), i_guid(guid), i_myguid(myguid), i_cooldown(cooldown){}
+	bool operator()(Creature* u)
+	{
+		//if (u->IsAlive() && !u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && (u->GetDBTableGUIDLow() == i_myguid) && (i_obj->GetDBTableGUIDLow() == i_guid))
+		if (u->IsAlive() && !u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && (i_obj->GetDBTableGUIDLow() == i_myguid) && (u->GetDBTableGUIDLow() == i_guid))
+			return true;
+		return false;
+	}
+private:
+	Creature* i_obj;
+	float i_range;
+	uint64 i_guid;
+	uint64 i_myguid;
+	uint32 i_cooldown;
+};
 
 class FriendlyMissingBuffInRange
 {

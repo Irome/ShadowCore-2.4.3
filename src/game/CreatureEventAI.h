@@ -61,7 +61,7 @@ enum EventAI_Type
     EVENT_T_SUMMONED_JUST_DESPAWN   = 26,                   // CreatureId, RepeatMin, RepeatMax
     EVENT_T_MISSING_AURA            = 27,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
-
+	EVENT_T_FRIENDLY_NPC			= 29,
     EVENT_T_END,
 };
 
@@ -540,6 +540,13 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } buffed;
+		struct
+		{
+			uint32 guid;                              
+			uint32 radius;
+			uint32 myguid;
+			uint32 cooldown;
+		} friendly_npc;
 
         // RAW
         struct
@@ -621,7 +628,7 @@ class CreatureEventAI : public CreatureAI
         Unit* DoSelectLowestHpFriendly(float range, uint32 MinHPDiff);
         void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid);
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
-
+		void DoFindFriendlyNPC(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown);
         //Holder for events (stores enabled, time, and eventid)
         std::list<CreatureEventAIHolder> CreatureEventAIList;
         uint32 EventUpdateTime;                             //Time between event updates

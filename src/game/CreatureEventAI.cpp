@@ -248,6 +248,24 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             pHolder.UpdateRepeatTimer(me, event.friendly_is_cc.repeatMin, event.friendly_is_cc.repeatMax);
             break;
         }
+	case EVENT_T_FRIENDLY_NPC:
+	{
+		if (me->IsInCombat())
+			return false;
+
+		 std::list<Creature*> pList;
+		 DoFindFriendlyNPC(pList, event.friendly_npc.guid, event.friendly_npc.radius, event.friendly_npc.myguid, event.friendly_npc.cooldown);
+		//List is empty
+		 if (pList.empty())
+			return false;
+
+		//We don't really care about the whole list, just return first available
+		pActionInvoker = *(pList.begin());
+
+		 //Repeat Timers
+		pHolder.UpdateRepeatTimer(me, event.friendly_npc.cooldown, event.friendly_npc.cooldown);
+		break;
+	}
     case EVENT_T_FRIENDLY_MISSING_BUFF:
         {
             std::list<Creature*> pList;
@@ -497,6 +515,9 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             {
                 case SPELL_FAILED_NO_POWER:
                 case SPELL_FAILED_OUT_OF_RANGE:
+				case SPELL_FAILED_SILENCED:
+				case SPELL_PREVENTION_TYPE_PACIFY:
+				case SPELL_FAILED_DAMAGE_IMMUNE:
                 case SPELL_FAILED_LINE_OF_SIGHT:
                 {
                     // Melee current victim if flag not set
@@ -1086,6 +1107,9 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                 case EVENT_T_TIMER_OOC:
                     ProcessEvent(*i);
                     break;
+				case EVENT_T_FRIENDLY_NPC:
+					ProcessEvent(*i);
+					break;
                 case EVENT_T_TIMER:
                 case EVENT_T_MANA:
                 case EVENT_T_HP:
@@ -1199,6 +1223,20 @@ void CreatureEventAI::DoFindFriendlyCC(std::list<Creature*>& _list, float range)
     TypeContainerVisitor<Oregon::CreatureListSearcher<Oregon::FriendlyCCedInRange>, GridTypeMapContainer >  grid_creature_searcher(searcher);
 
     cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
+}
+
+void CreatureEventAI::DoFindFriendlyNPC(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown)
+{
+	CellCoord p(Oregon::ComputeCellCoord(me->GetPositionX(), me->GetPositionY()));
+	Cell cell(p);
+	cell.SetNoCreate();
+
+	Oregon::FriendlyNPCInRange u_check(me, guid, range, myguid, cooldown);
+	Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRange> searcher(_list, u_check);
+
+	TypeContainerVisitor<Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRange>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+	cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
 }
 
 void CreatureEventAI::DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid)
@@ -1318,6 +1356,9 @@ SpellCastResult CreatureEventAI::CanCast(Unit* target, SpellEntry const* spell, 
             if (target->HasAura(spell->Id))
                 return SPELL_FAILED_TARGET_AURASTATE;
         }
+
+		if (target->IsImmunedToDamage(spell))
+			return SPELL_FAILED_DAMAGE_IMMUNE;
 
         // Silenced so we can't cast
         if (!(flags & CAST_TRIGGERED) && me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))

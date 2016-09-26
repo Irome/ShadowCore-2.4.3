@@ -382,6 +382,10 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                 if (temp.friendly_is_cc.repeatMax < temp.friendly_is_cc.repeatMin)
                     sLog.outErrorDb("CreatureEventAI:  Creature %u is using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
                 break;
+			case EVENT_T_FRIENDLY_NPC:
+				if (temp.friendly_npc.cooldown+1 < temp.friendly_npc.cooldown)
+					sLog.outErrorDb("CreatureEventAI:  Creature %u is using repeatable event(%u) with param4 < param3 (RepeatMax < RepeatMin). Event will never repeat.", temp.creature_id, i);
+				break;
             case EVENT_T_FRIENDLY_MISSING_BUFF:
                 {
                     SpellEntry const* pSpell = sSpellStore.LookupEntry(temp.spell_hit.spellId);
