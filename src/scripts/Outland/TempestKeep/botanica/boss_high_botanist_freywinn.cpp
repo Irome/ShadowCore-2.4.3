@@ -17,8 +17,8 @@
 
 /* ScriptData
 SDName: Boss_High_Botanist_Freywinn
-SD%Complete: 90
-SDComment: some strange visual related to tree form(if aura lost before normal duration end). possible make summon&transform -process smoother(transform after delay)
+SD%Complete: 95 
+SDComment: some strange visual related to tree form(if aura lost before normal duration end). Edit by Lee
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
@@ -75,39 +75,29 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
     {
         if (summoned->GetEntry() == ENTRY_FRAYER)
             Adds_List.push_back(summoned->GetGUID());
+
+		//  Forced Summon Frayers to Attack players
+		if (me->GetVictim())
+			summoned->AI()->AttackStart(me->GetVictim());
     }
 
-    void DoSummonSeedling()
-    {
-        switch (rand() % 4)
-        {
-        case 0:
-            DoCast(me, SPELL_PLANT_WHITE);
-            break;
-        case 1:
-            DoCast(me, SPELL_PLANT_GREEN);
-            break;
-        case 2:
-            DoCast(me, SPELL_PLANT_BLUE);
-            break;
-        case 3:
-            DoCast(me, SPELL_PLANT_RED);
-            break;
-        }
-    }
+	void DoSummonSeedling()
+	{
+		{
+			switch (urand(0, 3))
+			{
+			case 0: DoCast(me, SPELL_PLANT_WHITE); break;
+			case 1: DoCast(me, SPELL_PLANT_GREEN); break;
+			case 2: DoCast(me, SPELL_PLANT_BLUE);  break;
+			case 3: DoCast(me, SPELL_PLANT_RED);   break;
+			}
+		}
+	}
 
     void KilledUnit(Unit* /*victim*/)
-    {
-        switch (rand() % 2)
-        {
-        case 0:
-            DoScriptText(SAY_KILL_1, me);
-            break;
-        case 1:
-            DoScriptText(SAY_KILL_2, me);
-            break;
-        }
-    }
+	{
+		DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, me);
+	}
 
     void JustDied(Unit* /*Killer*/)
     {
@@ -123,20 +113,16 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
         {
             switch (rand() % 2)
             {
-            case 0:
-                DoScriptText(SAY_TREE_1, me);
-                break;
-            case 1:
-                DoScriptText(SAY_TREE_2, me);
-                break;
+            case 0:DoScriptText(SAY_TREE_1, me); break;
+            case 1:DoScriptText(SAY_TREE_2, me); break; 
             }
 
             if (me->IsNonMeleeSpellCast(false))
                 me->InterruptNonMeleeSpells(true);
 
             me->RemoveAllAuras();
-
-            DoCast(me, SPELL_SUMMON_FRAYER, true);
+			for (uint8 i = 0; i<3; ++i) // loop to the spell of summoning Spell Frayer max loop of the spell is x3
+            DoCast(me, SPELL_SUMMON_FRAYER, true +i);
             DoCast(me, SPELL_TRANQUILITY, true);
             DoCast(me, SPELL_TREE_FORM, true);
 
