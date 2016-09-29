@@ -112,7 +112,7 @@ enum EventAI_ActionType
     ACTION_T_SET_INVINCIBILITY_HP_LEVEL = 42,               // MinHpValue, format(0-flat,1-percent from max health)
     ACTION_T_MOUNT_TO_ENTRY_OR_MODEL    = 43,               // Creature_template entry(param1) OR ModelId (param2) (or 0 for both to unmount)
     ACTION_T_CHANCED_TEXT               = 44,               // Chance to display the text, TextId1, optionally TextId2. If more than just -TextId1 is defined, randomize. Negative values.
-
+	ACTION_T_TEXT_DELAY				    = 45,
     ACTION_T_SET_AGGRESSIVE             = 102,  //Apply
     ACTION_T_ATTACK_START_PULSE         = 103,  //Distance
     ACTION_T_SUMMON_GO                  = 104,  //GameObjectID, DespawnTime in ms
@@ -134,6 +134,7 @@ enum Target
 
     //Invoker targets (if pet then returns pet owner)
     TARGET_T_ACTION_INVOKER,                                //Unit who caused this Event to occur (only works for EVENT_T_AGGRO, EVENT_T_KILL, EVENT_T_DEATH, EVENT_T_SPELLHIT, EVENT_T_OOC_LOS, EVENT_T_FRIENDLY_HP, EVENT_T_FRIENDLY_IS_CC, EVENT_T_FRIENDLY_MISSING_BUFF)
+	TARGET_T_CASTING_PLAYER,
 
     //Hostile targets (including pets)
     TARGET_T_HOSTILE_WPET,                                  //Current target (can be a pet)
@@ -400,6 +401,13 @@ struct CreatureEventAI_Action
             uint32 chance;
             int32 TextId[2];
         } chanced_text;
+		// ACTION_T_TEXT_DELAY                           	= 45
+		struct
+		{
+			uint32 text;
+			uint32 deley;
+			uint32 guid;
+		} text_delay;
         // RAW
         struct
         {

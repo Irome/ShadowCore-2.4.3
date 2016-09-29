@@ -1173,22 +1173,39 @@ inline int32 CreatureEventAI::GetRandActionParam(uint32 rnd, int32 param1, int32
 
 inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoker)
 {
-    switch (Target)
-    {
-    case TARGET_T_SELF:
-        return me;
-    case TARGET_T_HOSTILE:
-        return me->GetVictim();
-    case TARGET_T_HOSTILE_SECOND_AGGRO:
-        return SelectTarget(SELECT_TARGET_TOPAGGRO, 1);
-    case TARGET_T_HOSTILE_LAST_AGGRO:
-        return SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 0);
-    case TARGET_T_HOSTILE_RANDOM:
-        return SelectTarget(SELECT_TARGET_RANDOM, 0);
-    case TARGET_T_HOSTILE_RANDOM_NOT_TOP:
-        return SelectTarget(SELECT_TARGET_RANDOM, 1);
-    case TARGET_T_ACTION_INVOKER:
-        return pActionInvoker;
+	switch (Target)
+	{
+	case TARGET_T_SELF:
+		return me;
+	case TARGET_T_HOSTILE:
+		return me->GetVictim();
+	case TARGET_T_HOSTILE_SECOND_AGGRO:
+		return SelectTarget(SELECT_TARGET_TOPAGGRO, 1);
+	case TARGET_T_HOSTILE_LAST_AGGRO:
+		return SelectTarget(SELECT_TARGET_BOTTOMAGGRO, 0);
+	case TARGET_T_HOSTILE_RANDOM:
+		return SelectTarget(SELECT_TARGET_RANDOM, 0);
+	case TARGET_T_HOSTILE_RANDOM_NOT_TOP:
+		return SelectTarget(SELECT_TARGET_RANDOM, 1);
+	case TARGET_T_ACTION_INVOKER:
+		return pActionInvoker;
+	case TARGET_T_CASTING_PLAYER:
+		{
+			Unit* caster = NULL;
+			ThreatContainer::StorageType const &t_list = me->getThreatManager().getThreatList();
+			std::vector<Unit* > target_list;
+			for (ThreatContainer::StorageType::const_iterator itr = t_list.begin(); itr != t_list.end(); ++itr)
+			{
+				caster = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+				if (caster && (caster->GetTypeId() == TYPEID_PLAYER) && (caster->IsWithinLOSInMap(me)) && caster->HasUnitState(UNIT_STATE_CASTING))
+					target_list.push_back(caster);
+				caster = NULL;
+			}
+			if (target_list.size())
+				caster = *(target_list.begin() + rand() % target_list.size());
+
+			return caster;
+		}
     default:
         return NULL;
     };
