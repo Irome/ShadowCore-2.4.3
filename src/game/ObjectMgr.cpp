@@ -7061,7 +7061,7 @@ bool ObjectMgr::AddGameTele(GameTele& tele)
 bool ObjectMgr::AddNPCEmote(uint64 guid, uint64 id)
 {
 	WorldDatabase.PExecuteLog("INSERT INTO creature_addon (guid,emote) VALUES ('" UI64FMTD "',%u)", guid, id);
-	return WorldDatabase.PExecuteLog("UPDATE creature_addon SET emote= "UI64FMTD" WHERE guid = '"UI64FMTD"'", id, guid);
+	return WorldDatabase.PExecuteLog("UPDATE creature_addon SET emote= '" UI64FMTD "' WHERE guid = '" UI64FMTD "' ", id, guid);
 }
 
 bool ObjectMgr::AddNPCPath(PathforNPC& path)
