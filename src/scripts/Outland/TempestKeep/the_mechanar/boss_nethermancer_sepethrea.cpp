@@ -17,8 +17,8 @@
 
 /* ScriptData
 SDName: Boss_Nethermancer_Sepethrea
-SD%Complete: 90
-SDComment: Need adjustments to initial summons
+SD%Complete: 100%
+SDComment: Edit by Lee
 SDCategory: Tempest Keep, The Mechanar
 EndScriptData */
 
@@ -127,26 +127,17 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
         else arcane_blast_Timer -= diff;
 
         //Dragons Breath
-        if (dragons_breath_Timer <= diff)
-        {
-            DoCastVictim(SPELL_DRAGONS_BREATH);
-            {
-                if (rand() % 2)
-                    return;
-
-                switch (rand() % 2)
-                {
-                case 0:
-                    DoScriptText(SAY_DRAGONS_BREATH_1, me);
-                    break;
-                case 1:
-                    DoScriptText(SAY_DRAGONS_BREATH_2, me);
-                    break;
-                }
-            }
-            dragons_breath_Timer = 12000 + rand() % 10000;
-        }
-        else dragons_breath_Timer -= diff;
+		if (dragons_breath_Timer < diff)
+		{
+			DoCast(SPELL_DRAGONS_BREATH);
+			{
+				if (urand(0, 1))
+					DoScriptText(urand(0, 1) ? SAY_DRAGONS_BREATH_1 : SAY_DRAGONS_BREATH_2, me);
+				dragons_breath_Timer = urand(20000, 35000);
+			}
+		}
+		else
+			dragons_breath_Timer -= diff;
 
         //Knockback
         if (knockback_Timer <= diff)
@@ -240,7 +231,7 @@ struct mob_ragin_flamesAI : public ScriptedAI
 
         if (inferno_Timer <= diff)
         {
-            DoCastVictim(HeroicMode ? H_SPELL_INFERNO : SPELL_INFERNO);
+            DoCastVictim(HeroicMode ? H_SPELL_INFERNO : H_SPELL_INFERNO);
             me->TauntApply(me->GetVictim());
             inferno_Timer = 10000;
         }
