@@ -40,7 +40,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI
     void Reset()
     {
         Repentance_Timer    = 30000 + (rand() % 15000);
-		Holyfire_Timer = 6000 + rand() % 10000;
+		Holyfire_Timer = 6000 + (rand() % 10000);
 		Holywrath_Timer = 20000;
 		Holyground_Timer = 2000;
 		Enrage_Timer = 600000;
@@ -144,8 +144,6 @@ struct boss_maiden_of_virtueAI : public ScriptedAI
 			}
 			if (target_list.size())
 				pTarget = *(target_list.begin() + rand() % target_list.size());
-
-			std::cout << "target: " << pTarget->GetName() << std::endl;
 
 			if (pTarget)
 			{
