@@ -249,23 +249,41 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
             break;
         }
 	case EVENT_T_FRIENDLY_NPC:
-	{
-		if (me->IsInCombat())
-			return false;
+		{
+			if (me->IsInCombat())
+				return false;
 
-		 std::list<Creature*> pList;
-		 DoFindFriendlyNPC(pList, event.friendly_npc.guid, event.friendly_npc.radius, event.friendly_npc.myguid, event.friendly_npc.cooldown);
-		//List is empty
-		 if (pList.empty())
-			return false;
+			 std::list<Creature*> pList;
+			 DoFindFriendlyNPC(pList, event.friendly_npc.guid, event.friendly_npc.radius, event.friendly_npc.myguid, event.friendly_npc.cooldown);
+			//List is empty
+			 if (pList.empty())
+				return false;
 
-		//We don't really care about the whole list, just return first available
-		pActionInvoker = *(pList.begin());
+			//We don't really care about the whole list, just return first available
+			pActionInvoker = *(pList.begin());
 
-		 //Repeat Timers
-		pHolder.UpdateRepeatTimer(me, event.friendly_npc.cooldown, event.friendly_npc.cooldown);
-		break;
-	}
+			 //Repeat Timers
+			pHolder.UpdateRepeatTimer(me, event.friendly_npc.cooldown, event.friendly_npc.cooldown);
+			break;
+		} 
+	case EVENT_T_FRIENDLY_NPC_COMBAT:
+		{
+			if (!me->IsInCombat())
+				return false;
+
+			std::list<Creature*> pList;
+			DoFindFriendlyNPCinCombat(pList, event.friendly_npc_combat.guid, event.friendly_npc_combat.radius, event.friendly_npc_combat.myguid, event.friendly_npc_combat.cooldown);
+			//List is empty
+			 if (pList.empty())
+				return false;
+
+			//We don't really care about the whole list, just return first available
+			pActionInvoker = *(pList.begin());
+
+			//Repeat Timers
+			pHolder.UpdateRepeatTimer(me, event.friendly_npc_combat.cooldown, event.friendly_npc_combat.cooldown);
+			break;
+		}
     case EVENT_T_FRIENDLY_MISSING_BUFF:
         {
             std::list<Creature*> pList;
@@ -930,14 +948,25 @@ void CreatureEventAI::JustDied(Unit* killer)
     if (bEmptyList)
         return;
 
-    //Handle Evade events
+	Unit* Invoker;
+
+	std::list<Creature*> pList;
+
     for (std::list<CreatureEventAIHolder>::iterator i = CreatureEventAIList.begin(); i != CreatureEventAIList.end(); ++i)
     {
-        if ((*i).Event.event_type == EVENT_T_DEATH)
-            ProcessEvent(*i, killer);
+		if ((*i).Event.event_type == EVENT_T_DEATH)
+		{
+			DoFindFriendlyNPConDeath(pList, (*i).Event.death.targetguid, (*i).Event.death.radius, (*i).Event.death.myguid);
+
+			if (pList.empty())
+				Invoker = NULL;
+			else
+				Invoker = *(pList.begin());
+
+			ProcessEvent(*i, Invoker);
+		}
     }
 
-    // reset phase after any death state events
     Phase = 0;
 }
 
@@ -1110,6 +1139,9 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
 				case EVENT_T_FRIENDLY_NPC:
 					ProcessEvent(*i);
 					break;
+				case EVENT_T_FRIENDLY_NPC_COMBAT:
+					ProcessEvent(*i);
+					break;
                 case EVENT_T_TIMER:
                 case EVENT_T_MANA:
                 case EVENT_T_HP:
@@ -1206,6 +1238,7 @@ inline Unit* CreatureEventAI::GetTargetByType(uint32 Target, Unit* pActionInvoke
 
 			return caster;
 		}
+	//case TARGET_T_
     default:
         return NULL;
     };
@@ -1252,6 +1285,34 @@ void CreatureEventAI::DoFindFriendlyNPC(std::list<Creature*>& _list, uint64 guid
 	Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRange> searcher(_list, u_check);
 
 	TypeContainerVisitor<Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRange>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+	cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
+}
+
+void CreatureEventAI::DoFindFriendlyNPCinCombat(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown)
+{
+	CellCoord p(Oregon::ComputeCellCoord(me->GetPositionX(), me->GetPositionY()));
+	Cell cell(p);
+	cell.SetNoCreate();
+
+	Oregon::FriendlyNPCInRangeCombat u_check(me, guid, range, myguid, cooldown);
+	Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRangeCombat> searcher(_list, u_check);
+
+	TypeContainerVisitor<Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRangeCombat>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+	cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
+}
+
+void CreatureEventAI::DoFindFriendlyNPConDeath(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid)
+{
+	CellCoord p(Oregon::ComputeCellCoord(me->GetPositionX(), me->GetPositionY()));
+	Cell cell(p);
+	cell.SetNoCreate();
+
+	Oregon::FriendlyNPCInRangeDeath u_check(me, guid, range, myguid);
+	Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRangeDeath> searcher(_list, u_check);
+
+	TypeContainerVisitor<Oregon::CreatureListSearcher<Oregon::FriendlyNPCInRangeDeath>, GridTypeMapContainer >  grid_creature_searcher(searcher);
 
 	cell.Visit(p, grid_creature_searcher, *me->GetMap(), *me, range);
 }
@@ -1419,12 +1480,15 @@ void CreatureEventAI::ReceiveEmote(Player* pPlayer, uint32 text_emote)
             if ((*itr).Event.receive_emote.emoteId != text_emote)
                 return;
 
+
+
             Condition* cond = new Condition();
             cond->Type = ConditionType((*itr).Event.receive_emote.condition);            
             cond->ConditionValue1 = (*itr).Event.receive_emote.conditionValue1;
             cond->ConditionValue2 = (*itr).Event.receive_emote.conditionValue2;
-            
+
             ConditionSourceInfo info(pPlayer);
+
             if (cond->Meets(info))
             {
                 sLog.outDebug("CreatureEventAI: ReceiveEmote CreatureEventAI: Condition ok, processing");

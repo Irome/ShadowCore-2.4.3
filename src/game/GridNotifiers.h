@@ -683,6 +683,7 @@ class FriendlyCCedInRange
         Unit const* i_obj;
         float i_range;
 };
+
 ///void DoFindFriendlyNPC(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown);
 class FriendlyNPCInRange
 {
@@ -701,6 +702,42 @@ private:
 	uint64 i_guid;
 	uint64 i_myguid;
 	uint32 i_cooldown;
+};
+
+class FriendlyNPCInRangeCombat
+{
+public:
+	FriendlyNPCInRangeCombat(Creature *obj, uint64 guid, float range, uint64 myguid, uint32 cooldown) : i_obj(obj), i_range(range), i_guid(guid), i_myguid(myguid), i_cooldown(cooldown){}
+	bool operator()(Creature* u)
+	{
+		//if (u->IsAlive() && !u->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && (u->GetDBTableGUIDLow() == i_myguid) && (i_obj->GetDBTableGUIDLow() == i_guid))
+		if (u->IsAlive() && i_obj->IsInCombat() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && (i_obj->GetDBTableGUIDLow() == i_myguid) && (u->GetDBTableGUIDLow() == i_guid))
+			return true;
+		return false;
+	}
+private:
+	Creature* i_obj;
+	float i_range;
+	uint64 i_guid;
+	uint64 i_myguid;
+	uint32 i_cooldown;
+};
+
+class FriendlyNPCInRangeDeath
+{
+public:
+	FriendlyNPCInRangeDeath(Creature *obj, uint64 targetguid, float range, uint64 myguid) : i_obj(obj), i_targetguid(targetguid), i_range(range), i_myguid(myguid){}
+	bool operator()(Creature* u)
+	{
+		if (u->IsAlive() && !i_obj->IsHostileTo(u) && i_obj->IsWithinDistInMap(u, i_range) && (i_obj->GetDBTableGUIDLow() == i_myguid) && (u->GetDBTableGUIDLow() == i_targetguid))
+			return true;	
+		return false;
+	}
+private:
+	Creature* i_obj;
+	uint64 i_targetguid;
+	float i_range;
+	uint64 i_myguid;
 };
 
 class FriendlyMissingBuffInRange

@@ -62,6 +62,7 @@ enum EventAI_Type
     EVENT_T_MISSING_AURA            = 27,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
 	EVENT_T_FRIENDLY_NPC			= 29,
+	EVENT_T_FRIENDLY_NPC_COMBAT		= 30,
     EVENT_T_END,
 };
 
@@ -401,13 +402,6 @@ struct CreatureEventAI_Action
             uint32 chance;
             int32 TextId[2];
         } chanced_text;
-		// ACTION_T_TEXT_DELAY                           	= 45
-		struct
-		{
-			uint32 text;
-			uint32 deley;
-			uint32 guid;
-		} text_delay;
         // RAW
         struct
         {
@@ -458,6 +452,13 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } kill;
+		//EVENT_T_DEATH										= 6
+		struct
+		{
+			uint32 targetguid;
+			uint32 radius;
+			uint32 myguid;
+		} death;
         // EVENT_T_SPELLHIT                                 = 8
         struct
         {
@@ -548,6 +549,7 @@ struct CreatureEventAI_Event
             uint32 repeatMin;
             uint32 repeatMax;
         } buffed;
+		//EVENT_T_FRIENDLY_NPC								=29
 		struct
 		{
 			uint32 guid;                              
@@ -555,7 +557,14 @@ struct CreatureEventAI_Event
 			uint32 myguid;
 			uint32 cooldown;
 		} friendly_npc;
-
+		//EVENT_T_FRIENDLY_NPC_COMBAT						=30
+		struct
+		{
+			uint32 guid;
+			uint32 radius;
+			uint32 myguid;
+			uint32 cooldown;
+		} friendly_npc_combat;
         // RAW
         struct
         {
@@ -611,7 +620,7 @@ class CreatureEventAI : public CreatureAI
         void JustReachedHome();
         void EnterCombat(Unit* enemy);
         void EnterEvadeMode();
-        void JustDied(Unit* /*killer*/);
+		void JustDied(Unit* /*killer*/);
         void KilledUnit(Unit* victim);
         void JustSummoned(Creature* pUnit);
         void AttackStart(Unit* who);
@@ -637,6 +646,9 @@ class CreatureEventAI : public CreatureAI
         void DoFindFriendlyMissingBuff(std::list<Creature*>& _list, float range, uint32 spellid);
         void DoFindFriendlyCC(std::list<Creature*>& _list, float range);
 		void DoFindFriendlyNPC(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown);
+		void DoFindFriendlyNPCinCombat(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid, uint32 cooldown);
+		void DoFindFriendlyNPConDeath(std::list<Creature*>& _list, uint64 guid, float range, uint64 myguid);
+
         //Holder for events (stores enabled, time, and eventid)
         std::list<CreatureEventAIHolder> CreatureEventAIList;
         uint32 EventUpdateTime;                             //Time between event updates

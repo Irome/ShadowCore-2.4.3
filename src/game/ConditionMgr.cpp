@@ -104,6 +104,7 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
     ASSERT(ConditionTarget < MAX_CONDITION_TARGETS);
     WorldObject* object = sourceInfo.mConditionTargets[ConditionTarget];
     // object not present, return false
+
     if (!object)
     {
         sLog.outDebug("Condition object not found for condition (Entry: %u Type: %u Group: %u)", SourceEntry, SourceType, SourceGroup);
@@ -111,6 +112,8 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
     }
     bool condMeets = false;
     bool sendErrorMsg = false;
+
+
     switch (Type)
     {
         case CONDITION_NONE:
