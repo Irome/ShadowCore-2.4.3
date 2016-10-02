@@ -1598,8 +1598,8 @@ void Aura::TriggerSpell()
                 //                    // Cannon Charging (self)
                 //                    case 36860: break;
                 // Remote Toy
-                case 37027:
-                    trigger_spell_id = 37029;
+				case 37027:
+					trigger_spell_id = 37029;
                     break;
                 //                    // Mark of Death
                 //                    case 37125: break;
@@ -2069,6 +2069,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         switch (GetId())
         {
         case 31261:
+		case 32441: //  Brittle Bones
+			m_isPeriodic = true;
+			m_modifier.periodictime = 15 * IN_MILLISECONDS;
+			m_periodicTimer = 15 * IN_MILLISECONDS;
+			return;
         case 29266:
             m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNK_29);
             m_target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
@@ -4092,21 +4097,21 @@ void Aura::HandleAuraModStalked(bool apply, bool /*Real*/)
 
 void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
 {
-    if (m_periodicTimer <= 0)
-        m_periodicTimer += m_amplitude;
+	if (m_periodicTimer <= 0)
+		m_periodicTimer += m_amplitude;
 
-    m_isPeriodic = apply;
+	m_isPeriodic = apply;
 
-    // Curse of the Plaguebringer
-    if (!apply && m_spellProto->Id == 29213 && m_removeMode != AURA_REMOVE_BY_DISPEL)
-    {
-        // Cast Wrath of the Plaguebringer if not dispelled
-        m_target->CastSpell(m_target, 29214, true, 0, this);
-    }
+	// Curse of the Plaguebringer
+	if (!apply && m_spellProto->Id == 29213 && m_removeMode != AURA_REMOVE_BY_DISPEL)
+	{
+		// Cast Wrath of the Plaguebringer if not dispelled
+		m_target->CastSpell(m_target, 29214, true, 0, this);
+	}
 
-    // Wrath of the Astromancer
-    if (!apply && m_spellProto->Id == 42783)
-        m_target->CastSpell(m_target, 42787, true, 0, this);
+	// Wrath of the Astromancer
+	if (!apply && m_spellProto->Id == 42783)
+		m_target->CastSpell(m_target, 42787, true, 0, this);
 }
 
 void Aura::HandlePeriodicTriggerSpellWithValue(bool apply, bool /*Real*/)
@@ -6497,7 +6502,18 @@ void Aura::PeriodicDummyTick()
     //        case 33209: break;
     //        // Force of Nature
     //        case 33831: break;
-    // Aspect of the Viper
+	// Brittle Bones
+	case 32441:
+		{
+			if (roll_chance_i(33))
+		    {
+				 m_target->CastSpell(m_target, 32437, true, NULL, this);
+				 m_modifier.periodictime = 15 * IN_MILLISECONDS;
+				 m_periodicTimer = 15 * IN_MILLISECONDS;
+		    }
+			return;
+		}
+	// Aspect of the Viper
     case 34074:
         {
             if (m_target->GetTypeId() != TYPEID_PLAYER)
