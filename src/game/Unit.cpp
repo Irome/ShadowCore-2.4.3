@@ -4195,6 +4195,29 @@ void Unit::RemoveAura(AuraMap::iterator& i, AuraRemoveMode mode)
     ++m_removedAurasCount;
 
     SpellEntry const* AurSpellInfo = Aur->GetSpellProto();
+
+	//// NETHERSPITE AURAS
+
+	if (Aur->GetId() == 30421)
+	{
+		if (!((Creature *)this)->HasAura(30421))
+			((Creature *)this)->AddAura(38637, ((Creature *)this));
+	}
+	else
+	if (Aur->GetId() == 30422)
+	{
+		((Creature *)this)->ModifyPower(POWER_MANA, ((Creature *)this)->GetMaxPower(POWER_MANA));
+		if (!((Creature *)this)->HasAura(30422))
+			((Creature *)this)->AddAura(38638, ((Creature *)this));
+	}
+	else
+	if (Aur->GetId() == 30423)
+	{
+		if (!((Creature *)this)->HasAura(30423))
+			((Creature *)this)->AddAura(38639, ((Creature *)this));
+	}
+	
+
     Unit* caster = NULL;
     Aur->UnregisterSingleCastAura();
 
