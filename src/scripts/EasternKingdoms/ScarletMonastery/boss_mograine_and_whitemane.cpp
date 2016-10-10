@@ -208,7 +208,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 };
 
 
-	struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
+struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
 	{
 		boss_high_inquisitor_whitemaneAI(Creature* creature) : ScriptedAI(creature)
 		{
@@ -277,6 +277,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 
 			if (_bCanResurrect)
 			{
+
 				//When casting resuruction make sure to delay so on rez when reinstate battle deepsleep runs out
 				if (Wait_Timer <= diff)
 				{
@@ -287,6 +288,9 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 						DoCast(mograine, SPELL_SCARLETRESURRECTION);
 						DoScriptText(SAY_WH_RESSURECT, me);
 						_bCanResurrect = false;
+						Wait_Timer = (me->GetDistance2d(mograine)) * 200;
+						if (Wait_Timer < 6000)
+							Wait_Timer = 6000;
 					}
 				}
 				else Wait_Timer -= diff;
@@ -306,7 +310,12 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 
 			//while in "resurrect-mode", don't do anything
 			if (_bCanResurrect)
+			{		
+				if (Creature* mograine = ObjectAccessor::GetCreature(*me, instance->GetData64(DATA_MOGRAINE)))
+					me->GetMotionMaster()->MoveChase(mograine, 1.0f, mograine->GetAngle(mograine->GetPositionX(), mograine->GetPositionY()));
 				return;
+			}
+				
 
 			//If we are <75% hp cast healing spells at self or Mograine
 			if (Heal_Timer <= diff)
