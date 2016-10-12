@@ -91,39 +91,33 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 
 		if (me->IsAlive())
 			instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, NOT_STARTED);
-<<<<<<< origin/dev-Talamortis
 			instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, FAIL); // Causes the door to reclose if on Mograine
-=======
 			instance->SetData(DATA_CHAPEL_DOOR, FAIL);
-			
->>>>>>> local
-			
 	}
 
 	void JustReachedHome() override
 	{
 		if (instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) != NOT_STARTED);
-<<<<<<< origin/dev-Talamortis
+
 			
-=======
+
 
 	}
 	void JustDied(Unit* /*victim*/)
 	{
 		instance->SetData(DATA_CHAPEL_DOOR, DONE);
 		
->>>>>>> local
 	}
 
 	void EnterCombat(Unit* /*who*/) override
 	{
 		DoScriptText(SAY_MO_AGGRO, me);
 		DoCast(me, SPELL_RETRIBUTIONAURA);
-<<<<<<< origin/dev-Talamortis
 
-=======
+
+
 		instance->SetData(DATA_CHAPEL_DOOR, IN_PROGRESS);
->>>>>>> local
+
 		me->CallForHelp(VISIBLE_RANGE);
 	}
 
@@ -143,10 +137,6 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 			instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, IN_PROGRESS);
 
 			Whitemane->GetMotionMaster()->MovePoint(1, 1163.113370f, 1398.856812f, 32.527786f);
-<<<<<<< origin/dev-Talamortis
-=======
-			
->>>>>>> local
 
 			me->GetMotionMaster()->MovementExpired();
 			me->GetMotionMaster()->MoveIdle();
@@ -159,16 +149,14 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 			me->ClearComboPointHolders();
 			me->RemoveAllAuras();
 			me->ClearAllReactives();
-<<<<<<< origin/dev-Talamortis
-
 			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 			me->SetStandState(UNIT_STAND_STATE_DEAD);
 
-=======
+
 			me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 			me->SetStandState(UNIT_STAND_STATE_DEAD);
 			
->>>>>>> local
+
 			_bHasDied = true;
 			_bFakeDeath = true;
 
@@ -198,18 +186,18 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 			//On resurrection, stop fake death and heal whitemane and resume fight
 			if (Unit* Whitemane = ObjectAccessor::GetUnit(*me, instance->GetData64(DATA_WHITEMANE)))
 			{
-<<<<<<< origin/dev-Talamortis
+
 				me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 				me->SetStandState(UNIT_STAND_STATE_STAND);
 				DoCast(Whitemane, SPELL_LAYONHANDS);
 
-=======
+
 				me->RemoveAllAuras();
 				me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 				me->SetStandState(UNIT_STAND_STATE_STAND);
 				DoCast(Whitemane, SPELL_LAYONHANDS);
 				
->>>>>>> local
+
 				CrusaderStrike_Timer = 10000;
 				HammerOfJustice_Timer = 10000;
 
@@ -245,7 +233,6 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 };
 
 
-<<<<<<< origin/dev-Talamortis
 	struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
 	{
 		boss_high_inquisitor_whitemaneAI(Creature* creature) : ScriptedAI(creature)
@@ -412,7 +399,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 		newscript->GetAI = &GetAI_boss_high_inquisitor_whitemane;
 		newscript->RegisterSelf();
 	}
-=======
+
 struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
 {
 	boss_high_inquisitor_whitemaneAI(Creature* creature) : ScriptedAI(creature)
@@ -593,4 +580,3 @@ void AddSC_boss_mograine_and_whitemane()
 	newscript->GetAI = &GetAI_boss_high_inquisitor_whitemane;
 	newscript->RegisterSelf();
 }
->>>>>>> local
