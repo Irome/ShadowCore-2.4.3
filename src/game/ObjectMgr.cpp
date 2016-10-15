@@ -7074,7 +7074,7 @@ bool ObjectMgr::AddNPCPath(PathforNPC& path)
 	WorldDatabase.PExecuteLog("UPDATE creature SET MovementType = '%u' WHERE guid = '" UI64FMTD "'", flaga, path.guid);
 	WorldDatabase.PExecuteLog("INSERT INTO waypoint_data (id,point,position_x,position_y,position_z,orientation) VALUES ('" UI64FMTD "','%u','%f','%f','%f','%f')",
 		path.guid, path.point, path.position_x, path.position_y, path.position_z, path.orientation);
-	return WorldDatabase.PExecuteLog("UPDATE waypoint_data SET position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE id = ('" UI64FMTD "' and point= '%u'", path.position_x, path.position_y, path.position_z, path.orientation, path.guid, path.point);
+	return WorldDatabase.PExecuteLog("UPDATE waypoint_data SET position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE id = '" UI64FMTD "' and point= '%u'", path.position_x, path.position_y, path.position_z, path.orientation, path.guid, path.point);
 }
 
 bool ObjectMgr::DeleteGameTele(const std::string& name)

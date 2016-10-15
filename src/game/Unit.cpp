@@ -51,6 +51,7 @@
 #include "MovementGenerator.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
+#include "Creature.h"
 
 #include <math.h>
 
@@ -7174,6 +7175,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
     if (GetTypeId() == TYPEID_UNIT && !IsPet())
     {
+		SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+
         // should not let player enter combat by right clicking target
         SetInCombatWith(victim);
         if (victim->GetTypeId() == TYPEID_PLAYER)

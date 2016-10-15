@@ -402,6 +402,7 @@ void InstanceSaveManager::LoadResetTimes()
     time_t now = time(NULL);
     time_t today = (now / DAY) * DAY;
 
+
     // NOTE: Use DirectPExecute for tables that will be queried later
 
     // get the current reset times for normal instances (these may need to be updated)
@@ -492,18 +493,18 @@ void InstanceSaveManager::LoadResetTimes()
             continue;
 
         // the reset_delay must be at least one day
-        uint32 period = uint32(((temp->reset_delay * sWorld.getRate(RATE_INSTANCE_RESET_TIME))/DAY) * DAY);
+        uint32 period = uint32(temp->reset_delay * sWorld.getRate(RATE_INSTANCE_RESET_TIME) * DAY);
         if (period < DAY)
             period = DAY;
 
         time_t t = m_resetTimeByMapId[temp->map];
-        if (!t)
+
+        if (t)
         {
             // initialize the reset time
             t = today + period + diff;
             CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','" UI64FMTD "')", i, (uint64)t);
         }
-
         if (t < now)
         {
             // assume that expired instances have already been cleaned
@@ -520,7 +521,6 @@ void InstanceSaveManager::LoadResetTimes()
         for (type = 1; type < 4; ++type)
             if (t - ResetTimeDelay[type-1] > now)
                 break;
-
         ScheduleReset(true, t - ResetTimeDelay[type-1], InstResetEvent(type, i));
     }
 }
