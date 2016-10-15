@@ -101,7 +101,7 @@ struct boss_scarlet_commander_mograineAI : public ScriptedAI
 		if (instance->GetData(TYPE_MOGRAINE_AND_WHITE_EVENT) != NOT_STARTED);
 
 	}
-	void JustDied()
+	void JustDied(Unit* /*killer*/)
 	{
 		instance->SetData(DATA_CHAPEL_DOOR, FAIL);
 		
