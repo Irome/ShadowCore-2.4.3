@@ -451,7 +451,6 @@ void InstanceSaveManager::LoadResetTimes()
 
     // load the global respawn times for raid/heroic instances
     uint32 diff = sWorld.getConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
-	std::cout << "diff: " << diff << std::endl;
     m_resetTimeByMapId.resize(sMapStore.GetNumRows() + 1);
     result = CharacterDatabase.Query("SELECT mapid, resettime FROM instance_reset");
     if (result)

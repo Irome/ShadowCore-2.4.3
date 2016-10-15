@@ -529,17 +529,17 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
 
             SpellCastResult castResult = CanCast(target, spell, action.cast.castFlags);
 
-            switch (castResult)
-            {
-                case SPELL_FAILED_NO_POWER:
-                case SPELL_FAILED_OUT_OF_RANGE:
+				switch (castResult)
+				{
+				case SPELL_FAILED_NO_POWER:
+				case SPELL_FAILED_OUT_OF_RANGE:
+				case SPELL_FAILED_TOO_CLOSE:
 				case SPELL_FAILED_SILENCED:
 				case SPELL_PREVENTION_TYPE_PACIFY:
 				case SPELL_FAILED_DAMAGE_IMMUNE:
                 case SPELL_FAILED_LINE_OF_SIGHT:
                 {
-                    // Melee current victim if flag not set
-                    if (!(action.cast.castFlags & CAST_NO_MELEE_IF_OOM))
+                    if (action.cast.castFlags & CAST_NO_MELEE_IF_OOM)
                     {
                         switch (me->GetMotionMaster()->GetCurrentMovementGeneratorType())
                         {
@@ -547,8 +547,8 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                             case FOLLOW_MOTION_TYPE:
                             case ASSISTANCE_MOTION_TYPE:
                             case IDLE_MOTION_TYPE:
-                                SetCombatMovement(true);
-                                break;
+								SetCombatMovement(false);
+								break;
                             default:
                                 break;
                         }
@@ -556,8 +556,6 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     break;
                 }
                 case SPELL_CAST_OK:
-                    /* @TODO: Correctly switch between melee/ranged states.
-                    SetCombatMovement(false);*/
                 default:
                     break;
             }
@@ -1152,10 +1150,29 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                         ProcessEvent(*i);
                     break;
                 case EVENT_T_RANGE:
-                    if (me->GetVictim())
-                        if (me->IsInMap(me->GetVictim()))
-                            if (me->IsInRange(me->GetVictim(), (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
-                                ProcessEvent(*i);
+					if (me->GetVictim())
+					{
+						if (me->IsInMap(me->GetVictim()))
+						{
+								if (me->GetVictim()->IsWithinLOSInMap(me))
+								{
+									if (me->IsInRange(me->GetVictim(), (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
+									{
+										ProcessEvent(*i);
+									}
+								}
+								else
+								{
+										if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+										{
+											SetCombatMovement(true);
+											me->GetMotionMaster()->MoveChase(me->GetVictim(), 1.0f, me->GetVictim()->GetAngle(me->GetVictim()->GetPositionX(), me->GetVictim()->GetPositionY()));
+										}
+								}
+								
+						}
+
+					}
                     break;
                 }
             }
