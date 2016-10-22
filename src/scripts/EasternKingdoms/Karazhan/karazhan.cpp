@@ -684,16 +684,39 @@ CreatureAI* GetAI_npc_image_of_medivh(Creature* pCreature)
 //*Concubine*//
 ///////////////
 
-enum ConcubineMisc
+enum TrashMisc
 {
+	//Text Emotes:
+	SAY_IDDLE1 = -1500001, //So I said, "Yeah, but that'll cast you extra."
+	SAY_IDDLE2 = -1910087, //They fall asleep after. Me, I fall asleep during....
+	SAY_IDDLE3 = -1910089, //He asked if the imp could join in... can you believe it? Actually, it wasn't half bad...
+	SAY_IDDLE4 = -1500000, //Five seconds! I'm not kidding!
+
+	SAY_TRANSFORM1 = -1500002, //Enough foreplay. Let's get down to buisness.
+	SAY_TRANSFORM2 = -1500009, //Shhh... I have a little secret I've been keeping. 
+	SAY_TRANSFORM3 = -1500013, //I want to show you a different side of me....
+
+	SAY_AGGRO1 = -1500006, //Come play with me!
+	SAY_AGGRO2 = -1500007, //I've been very, very naughty....
+	SAY_AGGRO3 = -1500005, //Come here, pretty.You have what I need!
+	SAY_AGGRO4 = -1500008, //Come any closer, and I'll scream.
+	SAY_AGGRO5 = -1500003, //You WILL be mine.
+
+	SAY_DEATH1 = -1910088, //We could have had so much fun!
+	SAY_DEATH2 = -1500004, //Just when things were getting interesting.
+	SAY_DEATH3 = -1500010, //I want you to be with me... forever and ever.
+	SAY_DEATH4 = -1500011, //<sigh> It's always over too soon.
+	SAY_DEATH5 = -1500012  //It was fun while it lasted....
+};
+
+enum Concubine
+{
+	//Concubine's spells:
+	SPELL_TORMENTINGLASH = 15969,
 	SPELL_TEMPTATION = 29494,
 	SPELL_SEDUCE = 29490,
 	SPELL_JEALOUSY = 29497,
-	SPELL_TRANSFORM = 29489,
-
-	SAY_CONCUBINE = -1910087,
-	SAY_CONCUBINE2 = -1910088,
-	SAY_CONCUBINE3 = -1910089
+	SPELL_TRANSFORM1 = 29489	//Concubine Transform
 };
 
 struct npc_concubineAI : public ScriptedAI
@@ -708,60 +731,152 @@ struct npc_concubineAI : public ScriptedAI
 	uint32 SecudeTimer;
 	uint32 TemptationTimer;
 	uint32 JealousyTimer;
-
+	uint32 Texttimer;
+	uint32 TemplashTimer;
 	bool transform;
 
 	void Reset()
 	{
+		TemplashTimer = 3000;
 		SecudeTimer = 5000;
-		TemptationTimer = 12000;
+		TemptationTimer = 5000;
 		JealousyTimer = 5000;
-
+		Texttimer = 5000 + urand(10000, 300000);
 		transform = false;
 
-		me->ApplySpellImmune(0, IMMUNITY_ID, 1098, true);
-		me->ApplySpellImmune(0, IMMUNITY_ID, 11725, true);
-		me->ApplySpellImmune(0, IMMUNITY_ID, 11726, true);
+		me->ApplySpellImmune(0, IMMUNITY_ID, 1098, true); //Enslave Demon r1
+		me->ApplySpellImmune(0, IMMUNITY_ID, 11725, true); //Enslave Demon r2
+		me->ApplySpellImmune(0, IMMUNITY_ID, 11726, true); //Enslave Demon r3
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CASTING_SPEED, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+		me->DeMorph();
 	}
 
 	void EnterCombat(Unit* /*who*/) 
 	{
-		DoScriptText(RAND(SAY_CONCUBINE, SAY_CONCUBINE2, SAY_CONCUBINE3), me);
+		switch (urand(0, 4))
+		{
+		case 0: DoScriptText(SAY_AGGRO1, me); break;
+		case 1: DoScriptText(SAY_AGGRO2, me); break;
+		case 2: DoScriptText(SAY_AGGRO3, me); break;
+		case 3: DoScriptText(SAY_AGGRO4, me); break;
+		case 4: DoScriptText(SAY_AGGRO5, me); break;
+		}
+	}
+
+	void JustDied(Unit *victim)
+	{
+		switch (urand(0, 4))
+		{
+		case 0: DoScriptText(SAY_DEATH1, me); break;
+		case 1: DoScriptText(SAY_DEATH2, me); break;
+		case 2: DoScriptText(SAY_DEATH3, me); break;
+		case 3: DoScriptText(SAY_DEATH4, me); break;
+		case 4: DoScriptText(SAY_DEATH5, me); break;
+		}
 	}
 
 	void UpdateAI(const uint32 diff)
 	{
+		if (!me->IsInCombat())
+		{
+			if (Texttimer <= diff)
+			{
+				switch (urand(0, 3))
+				{
+				case 0: DoScriptText(SAY_IDDLE1, me); break;
+				case 1: DoScriptText(SAY_IDDLE2, me); break;
+				case 2: DoScriptText(SAY_IDDLE3, me); break;
+				case 3: DoScriptText(SAY_IDDLE4, me); break;
+				}
+
+				Texttimer = 5000 + urand(20000, 300000);
+			}
+			else Texttimer -= diff;
+		}
+
 		if (!UpdateVictim())
 			return;
 
-		if (TemptationTimer <= diff)
+		if (!transform)
 		{
-			DoCast(me, SPELL_TEMPTATION);
-			TemptationTimer = 12000;
-		}
-		else TemptationTimer -= diff;
+			if (TemptationTimer <= diff)
+			{
+				Unit* pTarget = NULL;
+				ThreatContainer::StorageType const &t_list = me->getThreatManager().getThreatList();
+				std::vector<Unit* > target_list;
+				for (ThreatContainer::StorageType::const_iterator itr = t_list.begin(); itr != t_list.end(); ++itr)
+				{
+					pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+					if (pTarget &&  pTarget->IsWithinDist(me, 40.0f, false) && (pTarget->IsWithinLOSInMap(me)) && (pTarget->GetTypeId() == TYPEID_PLAYER) && !pTarget->HasAura(SPELL_TEMPTATION))
+						target_list.push_back(pTarget);
+					pTarget = NULL;
+				}
+				if (target_list.size())
+					pTarget = *(target_list.begin() + rand() % target_list.size());
 
-		if (JealousyTimer <= diff)
-		{			
-				DoCastVictim(SPELL_JEALOUSY);
-				JealousyTimer = 20000;
-		}
-		else JealousyTimer -= diff;
+				if (pTarget)
+				{
+					DoCast(pTarget, SPELL_TEMPTATION);
+					TemptationTimer = 5000;
+				}
+			}
+			else TemptationTimer -= diff;
 
-		if (!transform && HealthBelowPct(50))
+			if (HealthBelowPct(50))
+			{
+				switch (urand(0, 2))
+				{
+				case 0: DoScriptText(SAY_TRANSFORM1, me); break;
+				case 1: DoScriptText(SAY_TRANSFORM2, me); break;
+				case 2: DoScriptText(SAY_TRANSFORM3, me); break;
+				}
+				me->RemoveAllAuras();
+				DoCast(me, SPELL_TRANSFORM1);
+				DoCastVictim(SPELL_SEDUCE);
+				transform = true;
+
+			}
+		}
+		else
 		{
-			DoCast(me, SPELL_TRANSFORM);
-			DoCast(SPELL_SEDUCE);
-			transform = true;		
-		}
+			if (JealousyTimer <= diff)
+			{
+				Unit* pTarget = NULL;
+				ThreatContainer::StorageType const &t_list = me->getThreatManager().getThreatList();
+				std::vector<Unit* > target_list;
+				for (ThreatContainer::StorageType::const_iterator itr = t_list.begin(); itr != t_list.end(); ++itr)
+				{
+					pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+					if (pTarget &&  pTarget->IsWithinDist(me, 40.0f, false) && (pTarget->IsWithinLOSInMap(me)) && (pTarget->GetTypeId() == TYPEID_PLAYER))
+						target_list.push_back(pTarget);
+					pTarget = NULL;
+				}
+				if (target_list.size())
+					pTarget = *(target_list.begin() + rand() % target_list.size());
 
-		if (SecudeTimer <= diff)
-		{
-			DoCastVictim(SPELL_SEDUCE);
-			SecudeTimer = 30000;
-		}
-		else SecudeTimer -= diff;
+				if (pTarget)
+				{
+					DoCast(pTarget, SPELL_JEALOUSY);
+					JealousyTimer = 5000;
+				}
+			}
+			else JealousyTimer -= diff;
 
+			if (TemplashTimer <= diff)
+			{
+				DoCastVictim(SPELL_TORMENTINGLASH);
+				SecudeTimer = 3000;
+			}
+			else TemplashTimer -= diff;
+
+			if (SecudeTimer <= diff)
+			{
+				DoCastVictim(SPELL_SEDUCE);
+				SecudeTimer = 12000;
+			}
+			else SecudeTimer -= diff;
+		}
 		DoMeleeAttackIfReady();
 	}
 };
@@ -770,6 +885,313 @@ CreatureAI* GetAI_npc_concubine(Creature* pCreature)
 {
 	return new npc_concubineAI(pCreature);
 }
+
+
+///////////////
+//*Night Mistress*//
+///////////////
+
+enum Mistress
+{
+	SPELL_BETRAYAL = 29491,		//Impending Betrayal
+	SPELL_SPAIN = 30358,		//Searing Pain
+	SPELL_SBOLT = 29487,		//Shadow Bolt
+	SPELL_TRANSFORM2 = 29488	//Mistress Transform
+};
+
+struct npc_mistressAI : public ScriptedAI
+{
+	npc_mistressAI(Creature* c) : ScriptedAI(c)
+	{
+		pInstance = (ScriptedInstance*)c->GetInstanceData();
+	}
+
+	ScriptedInstance* pInstance;
+
+	uint32 Texttimer;
+	uint32 ShadowBoltTimer;
+	uint32 SPainTimer;
+	uint32 BetrayalTimer;
+	bool transform;
+
+	void Reset()
+	{
+		ShadowBoltTimer = 1501;
+		SPainTimer = 1001;
+		BetrayalTimer = 10000 + urand(1000, 4000);
+		Texttimer = 5000 + urand(10000, 300000);
+		transform = false;
+
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CASTING_SPEED, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+		me->DeMorph();
+	}
+
+	void EnterCombat(Unit* /*who*/)
+	{
+		switch (urand(0, 4))
+		{
+		case 0: DoScriptText(SAY_AGGRO1, me); break;
+		case 1: DoScriptText(SAY_AGGRO2, me); break;
+		case 2: DoScriptText(SAY_AGGRO3, me); break;
+		case 3: DoScriptText(SAY_AGGRO4, me); break;
+		case 4: DoScriptText(SAY_AGGRO5, me); break;
+		}
+	}
+
+	void JustDied(Unit *victim)
+	{
+		switch (urand(0, 4))
+		{
+		case 0: DoScriptText(SAY_DEATH1, me); break;
+		case 1: DoScriptText(SAY_DEATH2, me); break;
+		case 2: DoScriptText(SAY_DEATH3, me); break;
+		case 3: DoScriptText(SAY_DEATH4, me); break;
+		case 4: DoScriptText(SAY_DEATH5, me); break;
+		}
+	}
+
+	void UpdateAI(const uint32 diff)
+	{
+		if (!me->IsInCombat())
+		{
+			if (Texttimer <= diff)
+			{
+				switch (urand(0, 3))
+				{
+				case 0: DoScriptText(SAY_IDDLE1, me); break;
+				case 1: DoScriptText(SAY_IDDLE2, me); break;
+				case 2: DoScriptText(SAY_IDDLE3, me); break;
+				case 3: DoScriptText(SAY_IDDLE4, me); break;
+				}
+
+				Texttimer = 5000 + urand(20000, 300000);
+			}
+			else Texttimer -= diff;
+		}
+
+		if (!UpdateVictim())
+			return;
+
+		if (!transform)
+		{
+			if (HealthBelowPct(50))
+			{
+				SPainTimer = 10000;
+				me->RemoveAllAuras();
+				DoCast(me, SPELL_TRANSFORM2);
+
+				if (me->HasAura(SPELL_TRANSFORM2))
+				{
+					switch (urand(0, 2))
+					{
+					case 0: DoScriptText(SAY_TRANSFORM1, me); break;
+					case 1: DoScriptText(SAY_TRANSFORM2, me); break;
+					case 2: DoScriptText(SAY_TRANSFORM3, me); break;
+					}
+					DoCastVictim(SPELL_BETRAYAL);
+					transform = true;
+				}
+			}
+
+			if (SPainTimer <= diff)
+			{
+				if (!me->HasUnitState(UNIT_STATE_CASTING))
+				{
+					DoCastVictim(SPELL_SPAIN);
+					SPainTimer = 1001;
+				}
+			}
+			else SPainTimer -= diff;
+		}
+		else
+		{
+			if (ShadowBoltTimer <= diff)
+			{
+				if (!me->HasUnitState(UNIT_STATE_CASTING))
+				{
+					DoCastVictim(SPELL_SBOLT);
+					ShadowBoltTimer = 1501;
+				}
+			}
+			else ShadowBoltTimer -= diff;
+
+			if (BetrayalTimer <= diff)
+			{
+				if (!me->HasUnitState(UNIT_STATE_CASTING))
+				{
+					DoCast(me, SPELL_BETRAYAL);
+					BetrayalTimer = 10000 + urand(1000, 4000);
+				}
+			}
+			else BetrayalTimer -= diff;
+
+		}
+		DoMeleeAttackIfReady();
+	}
+};
+
+CreatureAI* GetAI_npc_mistress(Creature* pCreature)
+{
+	return new npc_mistressAI(pCreature);
+}
+
+///////////////
+//*Wanton Hostess*//
+///////////////
+
+enum Hostess
+{
+	//Hostess's spells:
+	SPELL_ALLURING = 29485,		//Alluring Aura
+	SPELL_BEWITHCING = 29486,	//Bewitching Aura
+	SPELL_B_SHRIEK = 29505,		//Banshee Shriek
+	SPELL_B__WAIL = 29477,		//Banshee Wail
+	SPELL_TRANSFORM3 = 29472,	//Hostes Transform
+};
+
+
+struct npc_hostessAI : public ScriptedAI
+{
+	npc_hostessAI(Creature* c) : ScriptedAI(c)
+	{
+		pInstance = (ScriptedInstance*)c->GetInstanceData();
+	}
+
+	ScriptedInstance* pInstance;
+
+	uint32 Texttimer;
+	uint32 WailTimer;
+	uint32 ShriekTimer;
+	bool transform;
+	bool aura;
+
+
+	void Reset()
+	{
+		WailTimer = 1501;
+		ShriekTimer = 5000 + urand(5000, 8000);
+		Texttimer = 5000 + urand(10000, 300000);
+		transform = false;
+		aura = false;
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CASTING_SPEED, true);
+		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
+		me->DeMorph();
+	}
+
+	void EnterCombat(Unit* /*who*/)
+	{
+		switch (urand(0, 4))
+		{
+		case 0: DoScriptText(SAY_AGGRO1, me); break;
+		case 1: DoScriptText(SAY_AGGRO2, me); break;
+		case 2: DoScriptText(SAY_AGGRO3, me); break;
+		case 3: DoScriptText(SAY_AGGRO4, me); break;
+		case 4: DoScriptText(SAY_AGGRO5, me); break;
+		}
+	}
+
+	void JustDied(Unit *victim)
+	{
+		switch (urand(0, 4))
+		{
+		case 0: DoScriptText(SAY_DEATH1, me); break;
+		case 1: DoScriptText(SAY_DEATH2, me); break;
+		case 2: DoScriptText(SAY_DEATH3, me); break;
+		case 3: DoScriptText(SAY_DEATH4, me); break;
+		case 4: DoScriptText(SAY_DEATH5, me); break;
+		}
+	}
+
+	void UpdateAI(const uint32 diff)
+	{
+		if (!me->IsInCombat())
+		{
+			if (Texttimer <= diff)
+			{
+				switch (urand(0, 3))
+				{
+				case 0: DoScriptText(SAY_IDDLE1, me); break;
+				case 1: DoScriptText(SAY_IDDLE2, me); break;
+				case 2: DoScriptText(SAY_IDDLE3, me); break;
+				case 3: DoScriptText(SAY_IDDLE4, me); break;
+				}
+
+				Texttimer = 5000 + urand(20000, 300000);
+			}
+			else Texttimer -= diff;
+		}
+
+		if (!UpdateVictim())
+			return;
+
+		if (!transform)
+		{
+			if (!aura)
+			{
+				DoCast(me, SPELL_ALLURING);
+				aura = true;
+			}
+
+			if (HealthBelowPct(50))
+			{
+				me->RemoveAllAuras();
+				DoCast(me, SPELL_TRANSFORM3);
+
+				if (me->HasAura(SPELL_TRANSFORM3))
+				{
+					switch (urand(0, 2))
+					{
+					case 0: DoScriptText(SAY_TRANSFORM1, me); break;
+					case 1: DoScriptText(SAY_TRANSFORM2, me); break;
+					case 2: DoScriptText(SAY_TRANSFORM3, me); break;
+					}
+					DoCastVictim(SPELL_B_SHRIEK);
+					transform = true;
+					aura = false;
+				}
+			}
+		}
+		else
+		{
+			if (!aura)
+			{
+				DoCast(me, SPELL_BEWITHCING);
+				aura = true;
+			}
+
+			if (ShriekTimer <= diff)
+			{
+				if (!me->HasUnitState(UNIT_STATE_CASTING))
+				{
+					DoCastVictim(SPELL_B_SHRIEK);
+					ShriekTimer = 5000 + urand(5000, 8000);
+				}
+			}
+			else ShriekTimer -= diff;
+		}
+
+		if (WailTimer <= diff)
+		{
+			if (!me->HasUnitState(UNIT_STATE_CASTING))
+			{
+				DoCastVictim(SPELL_B__WAIL);
+				WailTimer = 1501;
+			}
+		}
+		else WailTimer -= diff;
+
+		DoMeleeAttackIfReady();
+	}
+};
+
+CreatureAI* GetAI_npc_hostess(Creature* pCreature)
+{
+	return new npc_hostessAI(pCreature);
+}
+
+
+
 
 ////////////////////
 //*arcane anomaly*//
@@ -1080,6 +1502,16 @@ void AddSC_karazhan()
 	newscript = new Script;
 	newscript->Name = "npc_concubine";
 	newscript->GetAI = &GetAI_npc_concubine;
+	newscript->RegisterSelf();
+
+	newscript = new Script;
+	newscript->Name = "npc_mistress";
+	newscript->GetAI = &GetAI_npc_mistress;
+	newscript->RegisterSelf();
+
+	newscript = new Script;
+	newscript->Name = "npc_hostess";
+	newscript->GetAI = &GetAI_npc_hostess;
 	newscript->RegisterSelf();
 
 	newscript = new Script;

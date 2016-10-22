@@ -499,12 +499,12 @@ void InstanceSaveManager::LoadResetTimes()
 
         time_t t = m_resetTimeByMapId[temp->map];
 
-        if (t)
+        if (!t)
         {
-            // initialize the reset time
-            t = today + period + diff;
+			t = today + period + diff;
             CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','" UI64FMTD "')", i, (uint64)t);
         }
+
         if (t < now)
         {
             // assume that expired instances have already been cleaned
