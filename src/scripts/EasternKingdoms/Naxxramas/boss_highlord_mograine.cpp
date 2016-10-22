@@ -111,7 +111,7 @@ struct boss_highlord_mograineAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit*)
+    void JustDied(Unit* /*killer*/)
     {
         me->MonsterYell(SAY_DEATH, LANG_UNIVERSAL, 0);
         DoPlaySoundToSet(me, SOUND_DEATH);
