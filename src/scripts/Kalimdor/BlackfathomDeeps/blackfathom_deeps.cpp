@@ -184,11 +184,27 @@ enum eMorridune
 
 struct npc_morriduneAI : public npc_escortAI
 {
+	Map::PlayerList const& PlList = me->GetMap()->GetPlayers();
+
     npc_morriduneAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
-        DoScriptText(SAY_MORRIDUNE_1, pCreature);
-        me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        Start(false, false, 0);
+		if (PlList.isEmpty())
+			return;
+
+		for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+		{
+			if (Player* pPlayer = i->GetSource())
+			{
+				if (pPlayer->GetTeamId() == TEAM_ALLIANCE)
+				{
+					DoScriptText(SAY_MORRIDUNE_1, pCreature);
+					me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+					Start(false, false, 0);
+				}
+				else
+					me->DespawnOrUnsummon();
+			}
+		}
     }
 
     void WaypointReached(uint32 uiPoint)
