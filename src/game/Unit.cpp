@@ -51,7 +51,6 @@
 #include "MovementGenerator.h"
 #include "MoveSplineInit.h"
 #include "MoveSpline.h"
-#include "Creature.h"
 
 #include <math.h>
 
@@ -4196,29 +4195,6 @@ void Unit::RemoveAura(AuraMap::iterator& i, AuraRemoveMode mode)
     ++m_removedAurasCount;
 
     SpellEntry const* AurSpellInfo = Aur->GetSpellProto();
-
-	//// NETHERSPITE AURAS
-
-	if (Aur->GetId() == 30421)
-	{
-		if (!((Creature *)this)->HasAura(30421))
-			((Creature *)this)->AddAura(38637, ((Creature *)this));
-	}
-	else
-	if (Aur->GetId() == 30422)
-	{
-		((Creature *)this)->ModifyPower(POWER_MANA, ((Creature *)this)->GetMaxPower(POWER_MANA));
-		if (!((Creature *)this)->HasAura(30422))
-			((Creature *)this)->AddAura(38638, ((Creature *)this));
-	}
-	else
-	if (Aur->GetId() == 30423)
-	{
-		if (!((Creature *)this)->HasAura(30423))
-			((Creature *)this)->AddAura(38639, ((Creature *)this));
-	}
-	
-
     Unit* caster = NULL;
     Aur->UnregisterSingleCastAura();
 
@@ -6698,11 +6674,7 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, Aura* triggeredBy
     // Cast positive spell on enemy target
     case 7099:  // Curse of Mending
     case 39647: // Curse of Mending
-	case 29495: // Temptation of Concubine
-		 {
-		 	 target = victim;
-		 	 break;
-		 }
+    case 29494: // Temptation
     case 20233: // Improved Lay on Hands (cast on target)
         {
             target = victim;
@@ -7179,8 +7151,6 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
 
     if (GetTypeId() == TYPEID_UNIT && !IsPet())
     {
-		SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
-
         // should not let player enter combat by right clicking target
         SetInCombatWith(victim);
         if (victim->GetTypeId() == TYPEID_PLAYER)
@@ -10007,16 +9977,16 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
         }
     }
 
-	if (!basePointsPerLevel && (spellProto->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION && spellProto->spellLevel) &&
-		spellProto->Effect[effect_index] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
-		spellProto->Effect[effect_index] != SPELL_EFFECT_KNOCK_BACK &&
-		spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_SPEED_ALWAYS &&
-		spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_SPEED_NOT_STACK &&
-		spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_INCREASE_SPEED &&
-		spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_DECREASE_SPEED)
-		//there are many more: slow speed, -healing pct
-		//value = int32(value*0.25f*exp(getLevel()*(70-spellProto->spellLevel)/1000.0f));
-		value = int32(2.95 * value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
+    if (!basePointsPerLevel && (spellProto->Attributes & SPELL_ATTR0_LEVEL_DAMAGE_CALCULATION && spellProto->spellLevel) &&
+        spellProto->Effect[effect_index] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
+        spellProto->Effect[effect_index] != SPELL_EFFECT_KNOCK_BACK &&
+        spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_SPEED_ALWAYS &&
+        spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_SPEED_NOT_STACK &&
+        spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_INCREASE_SPEED &&
+        spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_DECREASE_SPEED)
+        //there are many more: slow speed, -healing pct
+        //value = int32(value*0.25f*exp(getLevel()*(70-spellProto->spellLevel)/1000.0f));
+        value = int32(value * (int32)getLevel() / (int32)(spellProto->spellLevel ? spellProto->spellLevel : 1));
 
     return value;
 }
