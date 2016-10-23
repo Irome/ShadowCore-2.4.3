@@ -715,7 +715,7 @@ enum Concubine
 	SPELL_TORMENTINGLASH = 15969,
 	SPELL_SEDUCE = 29490,
 	SPELL_JEALOUSY = 29497,
-	SPELL_TRANSFORM1 = 29489,	//Concubine Transform
+	SPELL_TRANSFORM1 = 29489,	//Concubine
 	SPELL_TEMPTATION = 29494
 };
 
@@ -732,20 +732,21 @@ struct npc_concubineAI : public ScriptedAI
 	uint32 TemptationTimer;
 	uint32 JealousyTimer;
 	uint32 Texttimer;
-
+	uint32 TemplashTimer;
 	bool transform;
 
 	void Reset()
 	{
+		TemplashTimer = 3000;
 		SecudeTimer = 5000;
-		TemptationTimer = 12000;
+		TemptationTimer = 5000;
 		JealousyTimer = 5000;
 		Texttimer = 5000 + urand(10000, 300000);
 		transform = false;
 
-		me->ApplySpellImmune(0, IMMUNITY_ID, 1098, true);
-		me->ApplySpellImmune(0, IMMUNITY_ID, 11725, true);
-		me->ApplySpellImmune(0, IMMUNITY_ID, 11726, true);
+		me->ApplySpellImmune(0, IMMUNITY_ID, 1098, true); //Enslave Demon r1
+		me->ApplySpellImmune(0, IMMUNITY_ID, 11725, true); //Enslave Demon r2
+		me->ApplySpellImmune(0, IMMUNITY_ID, 11726, true); //Enslave Demon r3
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CASTING_SPEED, true);
 		me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_HASTE_SPELLS, true);
 		me->DeMorph();
@@ -838,17 +839,44 @@ struct npc_concubineAI : public ScriptedAI
 			}
 		}
 		else
-
-		if (!UpdateVictim())
-			return;
-
-		if (TemptationTimer <= diff)
-
 		{
-			DoCast(me, SPELL_TEMPTATION);
-			TemptationTimer = 12000;
-		}
+			if (JealousyTimer <= diff)
+			{
+				Unit* pTarget = NULL;
+				ThreatContainer::StorageType const &t_list = me->getThreatManager().getThreatList();
+				std::vector<Unit* > target_list;
+				for (ThreatContainer::StorageType::const_iterator itr = t_list.begin(); itr != t_list.end(); ++itr)
+				{
+					pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
+					if (pTarget &&  pTarget->IsWithinDist(me, 40.0f, false) && (pTarget->IsWithinLOSInMap(me)) && (pTarget->GetTypeId() == TYPEID_PLAYER))
+						target_list.push_back(pTarget);
+					pTarget = NULL;
+				}
+				if (target_list.size())
+					pTarget = *(target_list.begin() + rand() % target_list.size());
 
+				if (pTarget)
+				{
+					DoCast(pTarget, SPELL_JEALOUSY);
+					JealousyTimer = 5000;
+				}
+			}
+			else JealousyTimer -= diff;
+
+			if (TemplashTimer <= diff)
+			{
+				DoCastVictim(SPELL_TORMENTINGLASH);
+				SecudeTimer = 3000;
+			}
+			else TemplashTimer -= diff;
+
+			if (SecudeTimer <= diff)
+			{
+				DoCastVictim(SPELL_SEDUCE);
+				SecudeTimer = 12000;
+			}
+			else SecudeTimer -= diff;
+		}
 		DoMeleeAttackIfReady();
 	}
 };
@@ -1093,6 +1121,9 @@ struct npc_hostessAI : public ScriptedAI
 			}
 			else Texttimer -= diff;
 		}
+		
+		if (!UpdateVictim())
+			return;
 
 		if (!transform)
 		{
