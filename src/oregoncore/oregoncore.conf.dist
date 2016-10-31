@@ -828,7 +828,7 @@ BeepAtStart = 1
 Motd = "Welcome to an Oregon Core server."
 Server.LoginInfo = 0
 Command.LookupMaxResults = 0
-HealthInPercents = 1
+HealthInPercents = 0
 
 ###############################################################################
 # PLAYER INTERACTION
