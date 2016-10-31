@@ -332,6 +332,9 @@ bool DropAggro(Creature* pAttacker, Unit * target)
 	if (target->HasUnitState(UNIT_STATE_CONFUSED))
 		return true;
 
+	if (target->HasUnitState(UNIT_STATE_ROOT))
+		return true;
+	
 	if (target->HasUnitState(UNIT_STATE_FLEEING))
 		return true;
 
