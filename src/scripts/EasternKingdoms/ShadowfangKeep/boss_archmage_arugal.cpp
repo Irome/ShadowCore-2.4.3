@@ -51,13 +51,14 @@ struct boss_archmage_arugalAI : public ScriptedAI
 	void KilledUnit(Unit* /*Victim*/)
 	{
 		DoScriptText(SAY_KILL, me);
+		me->SetPower(POWER_MANA, (me->GetMaxPower(POWER_MANA) / 2));
 	}
 
 	void UpdateAI(const uint32 diff)
 	{
 		if (!UpdateVictim())
 			return;
-
+		  
 		if (me->IsNonMeleeSpellCast(false)) //Checks if spell NPC is already casting a spell
 			return;
 
@@ -68,6 +69,7 @@ struct boss_archmage_arugalAI : public ScriptedAI
 			ShadowBolt_Timer = 2000;
 		}
 		else ShadowBolt_Timer -= diff;
+		
 
 		//Casts ThunderShock
 		if (Thundershock_Timer <= diff)
