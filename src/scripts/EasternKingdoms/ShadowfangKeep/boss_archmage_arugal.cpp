@@ -36,7 +36,7 @@ struct boss_archmage_arugalAI : public ScriptedAI
 	void Reset()
 	{
 		
-		ShadowBolt_Timer = 2000;
+		ShadowBolt_Timer = 1000;
 		Shadowport_Timer = 20000;
 		Thundershock_Timer = 15000;
 		Transform_Timer = 25000;
@@ -66,7 +66,7 @@ struct boss_archmage_arugalAI : public ScriptedAI
 		if (ShadowBolt_Timer <= diff)
 		{
 			DoCastVictim(SPELL_SHADOWBOLT);
-			ShadowBolt_Timer = 2000;
+			ShadowBolt_Timer = 1000;
 		}
 		else ShadowBolt_Timer -= diff;
 		
