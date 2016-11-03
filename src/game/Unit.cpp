@@ -392,6 +392,68 @@ void Unit::Update(uint32 p_time)
     if (!IsInWorld())
         return;
 
+	//Spelllock timers
+	if (HolySpelllockFlag)
+	{
+		if (HolySpelllockTimer > 8000)
+			HolySpelllockTimer = 8000;
+
+		if (HolySpelllockTimer <= p_time)
+			HolySpelllockFlag = false;
+		else
+			HolySpelllockTimer -= p_time;
+	}
+	if (FireSpelllockFlag)
+	{
+		if (FireSpelllockTimer > 8000)
+			FireSpelllockTimer = 8000;
+
+		if (FireSpelllockTimer <= p_time)
+			FireSpelllockFlag = false;
+		else
+			FireSpelllockTimer -= p_time;
+	}
+	if (NatureSpelllockFlag)
+	{
+		if (NatureSpelllockTimer > 8000)
+			NatureSpelllockTimer = 8000;
+
+		if (NatureSpelllockTimer <= p_time)
+			NatureSpelllockFlag = false;
+		else
+			NatureSpelllockTimer -= p_time;
+	}
+	if (FrostSpelllockFlag)
+	{
+		if (FrostSpelllockTimer > 8000)
+			FrostSpelllockTimer = 8000;
+
+		if (FrostSpelllockTimer <= p_time)
+			FrostSpelllockFlag = false;
+		else
+			FrostSpelllockTimer -= p_time;
+	}
+	if (ShadowSpelllockFlag)
+	{
+			if (ShadowSpelllockTimer > 8000)
+				ShadowSpelllockTimer = 8000;
+
+			if (ShadowSpelllockTimer <= p_time)
+				ShadowSpelllockFlag = false;
+			else
+				ShadowSpelllockTimer -= p_time;
+	}
+	if (ArcaneSpelllockFlag)
+	{
+		if (ArcaneSpelllockTimer > 8000)
+			ArcaneSpelllockTimer = 8000;
+
+		if (ArcaneSpelllockTimer <= p_time)
+			ArcaneSpelllockFlag = false;
+		else
+			ArcaneSpelllockTimer -= p_time;
+	}
+
     _UpdateSpells(p_time);
 
     // update combat timer only for players and pets
@@ -1037,6 +1099,59 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
         sLog.outError("CastSpell: unknown spell by caster: %s %u)", (GetTypeId() == TYPEID_PLAYER ? "player (GUID:" : "creature (Entry:"), (GetTypeId() == TYPEID_PLAYER ? GetGUIDLow() : GetEntry()));
         return;
     }
+
+	if (spellInfo)
+	{
+
+		switch (spellInfo->SchoolMask)
+		{
+			case 0x02:
+			{
+						  if (HolySpelllockFlag)
+						  {
+							  return; //holy is blocked
+						  }
+			}
+			case 0x04:
+			{
+						  if (FireSpelllockFlag)
+						  {
+							  return; //fire is blocked
+						  }
+			}
+			case 0x08:
+			{
+						  if (NatureSpelllockFlag)
+						  {
+							  return; //nature is blocked
+						  }
+			}
+			case 0x10:
+			{
+						  if (FrostSpelllockFlag)
+						  {
+							  return; //frost is blocked
+						  }
+			}
+			case 0x20:
+			{
+						  if (ShadowSpelllockFlag == true)
+						  {
+							  return; //shadow is blocked
+						  }
+			}
+			case 0x40:
+			{
+						  if (ArcaneSpelllockFlag)
+						  {
+							  return; //arcane is blocked
+						  }
+			}
+		}
+	}
+
+
+
 
     SpellCastTargets targets;
     uint32 targetMask = spellInfo->Targets;
@@ -2695,6 +2810,25 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* victim, SpellEntry const* spellInf
             return SPELL_MISS_BLOCK;
     }
 
+	//if ((spellInfo->Effect[0] == 68) || (spellInfo->Effect[1] == 68) || (spellInfo->Effect[2] == 68)) //interrupt spell effect
+
+	switch (spellInfo->Id) // Interrupts list:
+	{
+		//Warrior 
+		case 6552:	{ victim->SpelllockTimer = 4000; break; } // Pummel r1
+		case 6554:	{ victim->SpelllockTimer = 4000; break; } // Pummel r2
+		case 72:	{ victim->SpelllockTimer = 6000; break; } // Shield Bash r1
+		case 1671:	{ victim->SpelllockTimer = 6000; break; } // Shield Bash r2
+		case 1672:	{ victim->SpelllockTimer = 6000; break; } // Shield Bash r3
+		case 29704:	{ victim->SpelllockTimer = 6000; break; } // Shield Bash r4
+		//Rogue
+		case 1766:	{ victim->SpelllockTimer = 5000; break; } // Kick r1
+		case 1767:	{ victim->SpelllockTimer = 5000; break; } // Kick r2
+		case 1768:	{ victim->SpelllockTimer = 5000; break; } // Kick r3
+		case 1769:	{ victim->SpelllockTimer = 5000; break; } // Kick r4
+		case 38768:	{ victim->SpelllockTimer = 5000; break; } // Kick r5
+	}
+
     return SPELL_MISS_NONE;
 }
 
@@ -2759,6 +2893,24 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellEntry const* spellInf
     int32 rand = irand(0, 10000);
     if (rand > HitChance)
         return SPELL_MISS_RESIST;
+
+	switch (spellInfo->Id) // Interrupts list:
+	{
+		//Shaman
+	case 8042:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r1
+	case 8044:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r2
+	case 8045:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r3
+	case 8046:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r4
+	case 10412:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r5
+	case 10413:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r6
+	case 10414:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r7
+	case 25454:	{ victim->SpelllockTimer = 2000; break; } // Earth Shock r8
+			//Mage
+	case 2139:	{ victim->SpelllockTimer = 8000; break; } // Counterspell
+			//Warlock
+	case 19244:	{ victim->SpelllockTimer = 5000; break; } // Spell Lock r1
+	case 19247:	{ victim->SpelllockTimer = 6000; break; } // Spell Lock r2
+	}
 
     return SPELL_MISS_NONE;
 }
@@ -3250,6 +3402,75 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool withInstant)
 {
     Spell* spell = m_currentSpells[spellType];
+
+	if (spell)
+	{
+		switch (spell->m_spellInfo->SchoolMask)
+		{
+			case 0x02:
+			{
+						 if (SpelllockTimer)
+						 {
+							 HolySpelllockTimer = SpelllockTimer;
+							 HolySpelllockFlag = true;
+							 SpelllockTimer = 0;
+							 break; //holy
+						 }
+
+			}
+			case 0x04: 
+			{
+						 if (SpelllockTimer)
+						 {
+							 FireSpelllockTimer = SpelllockTimer;
+							 FireSpelllockFlag = true;
+							 SpelllockTimer = 0;
+							 break; //fire
+						 }
+			}
+			case 0x08:
+			{
+						 if (SpelllockTimer)
+						 {
+							 NatureSpelllockTimer = SpelllockTimer;
+							 NatureSpelllockFlag = true;
+							 SpelllockTimer = 0;
+							 break;//nature
+						 }
+			}
+			case 0x10:
+			{
+						 if (SpelllockTimer)
+						 {
+							 FrostSpelllockTimer = SpelllockTimer;
+							 FrostSpelllockFlag = true;
+							 SpelllockTimer = 0;
+							 break;//frost
+						 }
+			}
+			case 0x20:
+			{
+						 if (SpelllockTimer)
+						 {
+							 ShadowSpelllockTimer = SpelllockTimer;
+							 ShadowSpelllockFlag = true;
+							 SpelllockTimer = 0;
+							 break;//shadow
+						 }
+			}
+			case 0x40:
+			{
+						 if (SpelllockTimer)
+						 {
+							 ArcaneSpelllockTimer = SpelllockTimer;
+							 ArcaneSpelllockFlag = true;
+							 SpelllockTimer = 0;
+							 break;//arcane
+						 }
+			}
+		}
+	}
+
     if (spell
         && (withDelayed || spell->getState() != SPELL_STATE_DELAYED)
         && (withInstant || spell->GetCastTime() > 0))
