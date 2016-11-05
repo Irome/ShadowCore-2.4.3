@@ -36,6 +36,7 @@ EndScriptData */
 #define SPELL_FROST_NOVA        15531
 #define SPELL_FROST_SPECTRES    12642
 
+
 struct boss_amnennar_the_coldbringerAI : public ScriptedAI
 {
     boss_amnennar_the_coldbringerAI(Creature* c) : ScriptedAI(c) {}
@@ -43,8 +44,9 @@ struct boss_amnennar_the_coldbringerAI : public ScriptedAI
     uint32 AmnenarsWrath_Timer;
     uint32 FrostBolt_Timer;
     uint32 FrostNova_Timer;
-    bool Spectrals60;
-    bool Spectrals30;
+    bool Spectrals70;
+    bool Spectrals55;
+	bool Spectrals30;
     bool Hp;
 
     void Reset()
@@ -52,10 +54,13 @@ struct boss_amnennar_the_coldbringerAI : public ScriptedAI
         AmnenarsWrath_Timer = 8000;
         FrostBolt_Timer = 1000;
         FrostNova_Timer = 10000 + rand() % 5000;
+        Spectrals70 = false;
+		Spectrals55 = false;
         Spectrals30 = false;
-        Spectrals60 = false;
         Hp = false;
     }
+
+
 
     void EnterCombat(Unit* /*who*/)
     {
@@ -95,11 +100,11 @@ struct boss_amnennar_the_coldbringerAI : public ScriptedAI
         }
         else FrostNova_Timer -= diff;
 
-        if (!Spectrals60 && HealthBelowPct(60))
+        if (!Spectrals70 && HealthBelowPct(70))
         {
             DoScriptText(SAY_SUMMON60, me);
             DoCastVictim( SPELL_FROST_SPECTRES);
-            Spectrals60 = true;
+            Spectrals70 = true;
         }
 
         if (!Hp && HealthBelowPct(50))
@@ -108,12 +113,20 @@ struct boss_amnennar_the_coldbringerAI : public ScriptedAI
             Hp = true;
         }
 
-        if (!Spectrals30 && HealthBelowPct(30))
+        if (!Spectrals55 && HealthBelowPct(55))
         {
             DoScriptText(SAY_SUMMON30, me);
             DoCastVictim( SPELL_FROST_SPECTRES);
-            Spectrals30 = true;
+            Spectrals55 = true;
         }
+
+
+		if (!Spectrals30 && HealthBelowPct(30))
+		{
+			DoScriptText(SAY_SUMMON30, me);
+			DoCastVictim(SPELL_FROST_SPECTRES);
+			Spectrals30 = true;
+		}
 
         DoMeleeAttackIfReady();
     }
