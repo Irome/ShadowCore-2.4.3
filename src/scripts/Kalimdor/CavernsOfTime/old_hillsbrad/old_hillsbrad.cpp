@@ -465,10 +465,8 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI
                         break;
                     case 37:
                         if (Creature* Taretha = me->GetMap()->GetCreature(TarethaGUID))
-                            DoScriptText(SAY_TA_ESCAPED, Taretha, me);
-                        break;
-                    case 38:
-                        pInstance->SetData(TYPE_THRALL_PART3,DONE);
+                            DoScriptText(SAY_TA_ESCAPED, Taretha, Taretha);
+                        pInstance->SetData(TYPE_THRALL_PART3, DONE);   
                         DoScriptText(SAY_TH_MEET_TARETHA, me);
                         me->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         break;
@@ -493,7 +491,8 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI
                             Creature* Taretha = (Unit::GetCreature(*me, TarethaGUID));
                             Taretha->CastSpell(Taretha, SPELL_SHADOW_SPIKE, true);
                             Taretha->SetStandState(UNIT_STAND_STATE_DEAD);
-                        } else if (Creature* Taretha = me->FindNearestCreature(18887, 300.0f, true))
+                        }
+                        else if (Creature* Taretha = me->FindNearestCreature(18887, 300.0f, true))
                         {
                             Taretha->CastSpell(Taretha, SPELL_SHADOW_SPIKE, true);
                             Taretha->SetStandState(UNIT_STAND_STATE_DEAD);
