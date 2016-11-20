@@ -127,8 +127,8 @@ struct boss_captain_skarlocAI : public ScriptedAI
                 case 0:
                     me->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
-                    if (Creature* Thrall = me->GetMap()->GetCreature(ThrallinGUID))
-                        Thrall->SummonCreature(SKARLOC_MOUNT,2049.90f, 256.85f, 62.822f, me->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 5000);
+                  //  if (Creature* Thrall = me->GetMap()->GetCreature(ThrallinGUID))
+                     //   Thrall->SummonCreature(SKARLOC_MOUNT,2049.90f, 256.85f, 62.822f, me->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 5000);
                             
                     me->SetWalk(true);
                     me->GetMotionMaster()->MovePoint(0, 2056.80f, 240.81f, 63.538f);
@@ -161,6 +161,11 @@ struct boss_captain_skarlocAI : public ScriptedAI
         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         me->Dismount();
         me->SetWalk(false);
+            if (Creature* Thrall = me->GetMap()->GetCreature(ThrallinGUID))
+                Thrall->SummonCreature(SKARLOC_MOUNT, 2049.90f, 256.85f, 62.822f, me->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 5000);
+        
+           
+
 
         if (Creature* Thrall = me->GetMap()->GetCreature(ThrallinGUID))
         {
@@ -187,8 +192,8 @@ struct boss_captain_skarlocAI : public ScriptedAI
     void EnterCombat(Unit *who)
     {
 
-        DoScriptText(SAY_TAUNT1, me);
-        DoScriptText(SAY_TAUNT2, me);
+        DoScriptText(RAND(SAY_TAUNT1, SAY_TAUNT2), me);
+       // DoScriptText(SAY_TAUNT2, me);
     }
 
     void KilledUnit(Unit *victim)
