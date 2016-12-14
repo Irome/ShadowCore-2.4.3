@@ -1102,50 +1102,49 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
 
 	if (spellInfo)
 	{
-
 		switch (spellInfo->SchoolMask)
 		{
 			case 0x02:
 			{
-						  if (HolySpelllockFlag)
-						  {
-							  return; //holy is blocked
-						  }
+                if (HolySpelllockFlag)
+                    {
+                        return; //holy is blocked
+                    }
 			}
 			case 0x04:
 			{
-						  if (FireSpelllockFlag)
-						  {
-							  return; //fire is blocked
-						  }
+			    if (FireSpelllockFlag)
+				    {
+					    return; //fire is blocked
+				    }
 			}
 			case 0x08:
 			{
-						  if (NatureSpelllockFlag)
-						  {
-							  return; //nature is blocked
-						  }
+				if (NatureSpelllockFlag)
+				    {
+					    return; //nature is blocked
+				    }
 			}
 			case 0x10:
 			{
-						  if (FrostSpelllockFlag)
-						  {
-							  return; //frost is blocked
-						  }
+				if (FrostSpelllockFlag)
+				    {
+					    return; //frost is blocked
+				    }
 			}
 			case 0x20:
 			{
-						  if (ShadowSpelllockFlag == true)
-						  {
-							  return; //shadow is blocked
-						  }
+				if (ShadowSpelllockFlag == true)
+					{
+						return; //shadow is blocked
+					}
 			}
 			case 0x40:
 			{
-						  if (ArcaneSpelllockFlag)
-						  {
-							  return; //arcane is blocked
-						  }
+				if (ArcaneSpelllockFlag)
+					{
+					    return; //arcane is blocked
+					}
 			}
 		}
 	}
@@ -3409,64 +3408,64 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
 		{
 			case 0x02:
 			{
-						 if (SpelllockTimer)
-						 {
-							 HolySpelllockTimer = SpelllockTimer;
-							 HolySpelllockFlag = true;
-							 SpelllockTimer = 0;
-							 break; //holy
-						 }
+			    if (SpelllockTimer)
+					{
+					HolySpelllockTimer = SpelllockTimer;
+					HolySpelllockFlag = true;
+					SpelllockTimer = 0;       
+					break; //holy
+					}
 
 			}
 			case 0x04: 
 			{
-						 if (SpelllockTimer)
-						 {
-							 FireSpelllockTimer = SpelllockTimer;
-							 FireSpelllockFlag = true;
-							 SpelllockTimer = 0;
-							 break; //fire
-						 }
+			    if (SpelllockTimer)
+					{
+					FireSpelllockTimer = SpelllockTimer;
+					FireSpelllockFlag = true;
+					SpelllockTimer = 0;
+					break; //fire
+					}
 			}
 			case 0x08:
 			{
-						 if (SpelllockTimer)
-						 {
-							 NatureSpelllockTimer = SpelllockTimer;
-							 NatureSpelllockFlag = true;
-							 SpelllockTimer = 0;
-							 break;//nature
-						 }
+				if (SpelllockTimer)
+					{
+					NatureSpelllockTimer = SpelllockTimer;
+					NatureSpelllockFlag = true;
+					SpelllockTimer = 0;
+					break;//nature
+					}
 			}
 			case 0x10:
 			{
-						 if (SpelllockTimer)
-						 {
-							 FrostSpelllockTimer = SpelllockTimer;
-							 FrostSpelllockFlag = true;
-							 SpelllockTimer = 0;
-							 break;//frost
-						 }
+				if (SpelllockTimer)
+					{
+					FrostSpelllockTimer = SpelllockTimer;
+					FrostSpelllockFlag = true;
+					SpelllockTimer = 0;
+					break;//frost
+					}
 			}
 			case 0x20:
 			{
-						 if (SpelllockTimer)
-						 {
-							 ShadowSpelllockTimer = SpelllockTimer;
-							 ShadowSpelllockFlag = true;
-							 SpelllockTimer = 0;
-							 break;//shadow
-						 }
+				if (SpelllockTimer)
+					{
+					ShadowSpelllockTimer = SpelllockTimer;
+					ShadowSpelllockFlag = true;
+					SpelllockTimer = 0;
+					break;//shadow
+					}
 			}
 			case 0x40:
 			{
-						 if (SpelllockTimer)
-						 {
-							 ArcaneSpelllockTimer = SpelllockTimer;
-							 ArcaneSpelllockFlag = true;
-							 SpelllockTimer = 0;
-							 break;//arcane
-						 }
+				if (SpelllockTimer)
+					{
+					ArcaneSpelllockTimer = SpelllockTimer;
+					ArcaneSpelllockFlag = true;
+					SpelllockTimer = 0;
+					break;//arcane
+					}
 			}
 		}
 	}

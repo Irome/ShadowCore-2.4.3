@@ -149,7 +149,7 @@ void AddSC_boss_rasfrost();
 void AddSC_boss_theravenian();
 void AddSC_boss_vectus();
 void AddSC_instance_scholomance();
-void AddSC_boss_archmage_arugal();
+void AddSC_boss_archmage_arugal();			 //Archmage Arugal Custom script
 void AddSC_shadowfang_keep();                //Shadowfang keep
 void AddSC_instance_shadowfang_keep();
 void AddSC_boss_magistrate_barthilas();      //Stratholme

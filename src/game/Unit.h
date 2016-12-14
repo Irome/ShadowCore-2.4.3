@@ -935,7 +935,7 @@ class Unit : public WorldObject
             return reach > MIN_MELEE_REACH ? reach : MIN_MELEE_REACH;
         }
 
-		bool HolySpelllockFlag = false;
+        bool HolySpelllockFlag = false;
 		bool FireSpelllockFlag = false;
 		bool NatureSpelllockFlag = false;
 		bool FrostSpelllockFlag = false;

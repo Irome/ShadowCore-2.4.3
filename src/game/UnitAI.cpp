@@ -46,6 +46,7 @@ void UnitAI::DoMeleeAttackIfReady()
 {
     if (me->HasUnitState(UNIT_STATE_CASTING))
         return;
+    
 
     //Make sure our attack is ready and we aren't currently casting before checking distance
     if (me->isAttackReady())
