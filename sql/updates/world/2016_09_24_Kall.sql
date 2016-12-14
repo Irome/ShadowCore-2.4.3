@@ -1,0 +1,10 @@
+DELETE FROM creature WHERE guid = '8005532';
+DELETE FROM creature_addon WHERE guid = '8005532';
+DELETE FROM game_event_creature WHERE guid = '8005532';
+DELETE FROM game_event_model_equip WHERE guid = '8005532';
+DELETE FROM creature WHERE guid = '8005535';
+REPLACE INTO creature VALUES (8005535,16412,0,1,16530,555,-11125.6,-2022.64,47.1528,1.7043,25,0,0,44000,0,0);
+DELETE FROM creature WHERE guid = '8005535';
+DELETE FROM creature_addon WHERE guid = '8005535';
+DELETE FROM game_event_creature WHERE guid = '8005535';
+DELETE FROM game_event_model_equip WHERE guid = '8005535';

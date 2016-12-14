@@ -1,0 +1,16 @@
+DELETE FROM creature WHERE guid = '8006406';
+DELETE FROM creature_addon WHERE guid = '8006406';
+DELETE FROM game_event_creature WHERE guid = '8006406';
+DELETE FROM game_event_model_equip WHERE guid = '8006406';
+DELETE FROM creature WHERE guid = '8006409';
+REPLACE INTO creature VALUES (8006409,20610,0,1,0,0,-11125.6,-2023.33,47.15,1.84602,25,0,0,6761,0,0);
+DELETE FROM creature WHERE guid = '8006409';
+DELETE FROM creature_addon WHERE guid = '8006409';
+DELETE FROM game_event_creature WHERE guid = '8006409';
+DELETE FROM game_event_model_equip WHERE guid = '8006409';
+DELETE FROM creature WHERE guid = '8004497';
+REPLACE INTO creature VALUES (8004497,16406,0,1,0,0,-11130.6,-2019.21,47.4358,4.63108,25,0,0,57730,16155,0);
+DELETE FROM creature WHERE guid = '8004497';
+DELETE FROM creature_addon WHERE guid = '8004497';
+DELETE FROM game_event_creature WHERE guid = '8004497';
+DELETE FROM game_event_model_equip WHERE guid = '8004497';
