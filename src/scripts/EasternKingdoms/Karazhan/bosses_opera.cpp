@@ -95,10 +95,14 @@ void SummonCroneIfReady(ScriptedInstance* pInstance, Creature* pCreature)
 
     if (pInstance->GetData(DATA_OPERA_OZ_DEATHCOUNT) == 4)
     {
+        
         if (Creature* pCrone = pCreature->SummonCreature(CREATURE_CRONE, -10891.96f, -1755.95f, pCreature->GetPositionZ(), 4.64f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, HOUR * 2 * IN_MILLISECONDS))
         {
             if (pCreature->GetVictim())
                 pCrone->AI()->AttackStart(pCreature->GetVictim());
+            pCrone->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            pCrone->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
+            
         }
     }
 };
@@ -577,6 +581,7 @@ struct boss_croneAI : public ScriptedAI
 
     uint32 CycloneTimer;
     uint32 ChainLightningTimer;
+    uint32 AttackTimer;
 
     void Reset()
     {
@@ -592,8 +597,6 @@ struct boss_croneAI : public ScriptedAI
     void EnterCombat(Unit* /*who*/)
     {
         DoScriptText(RAND(SAY_CRONE_AGGRO, SAY_CRONE_AGGRO2), me);
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-        me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
     }
 
     void JustDied(Unit* /*killer*/)
@@ -615,9 +618,6 @@ struct boss_croneAI : public ScriptedAI
     {
         if (!UpdateVictim())
             return;
-
-        if (me->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-            me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
         if (CycloneTimer <= diff)
         {
